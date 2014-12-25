@@ -36,7 +36,7 @@ type Data   = [Line]
 
 main' :: Either String Int -> BS.ByteString -> IO ()
 main' (Left  str) cs = die str
-main' (Right num) cs = header num h_axis >> mapM_ print (splitByKey d)
+main' (Right num) cs = header num h_axis >> mapM_ (body h_axis) (splitByKey d)
     where d = [ makeLine num ln | ln <- BS.lines cs ]
           h_axis = hAxis $ map ( \(_,s,_) -> s ) d
           hAxis []     = []
@@ -51,6 +51,16 @@ splitByKey lns@((key,_,_):_) = a : splitByKey b
 header :: Int -> [SubKey] -> IO ()
 header num ss = BS.putStrLn $ BS.unwords (keyf ++ ss)
     where keyf = replicate num (BS.pack "*")
+
+body :: [SubKey] -> [Line] -> IO ()
+body ss lns@((k,_,_):_) = BS.putStrLn $ BS.unwords (k:(body' ss lns))
+
+body' :: [SubKey] -> [Line] -> [Word]
+body' [] _          = []
+body' (sub:subs) [] = BS.pack "0" : body' subs []
+body' (sub:subs) alns@((_,s,(v:_)):lns) 
+  | sub == s  = v : body' subs lns
+  | otherwise = BS.pack "0" : body' subs alns
 
 makeLine :: Int -> BS.ByteString -> Line
 makeLine num ln = (k,s,v)
