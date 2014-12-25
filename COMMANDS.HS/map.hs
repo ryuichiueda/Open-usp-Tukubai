@@ -56,8 +56,8 @@ body :: [SubKey] -> [Line] -> IO ()
 body ss lns@((k,_,_):_) = BS.putStrLn $ BS.unwords (k:(body' ss lns))
 
 body' :: [SubKey] -> [Line] -> [Word]
-body' [] _          = []
-body' (sub:subs) [] = BS.pack "0" : body' subs []
+body' []   _  = []
+body' subs [] = replicate (length subs) (BS.pack "0")
 body' (sub:subs) alns@((_,s,(v:_)):lns) 
   | sub == s  = v : body' subs lns
   | otherwise = BS.pack "0" : body' subs alns
