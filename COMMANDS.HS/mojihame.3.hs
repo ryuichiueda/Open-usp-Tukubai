@@ -34,7 +34,14 @@ noopt' template ws = BS.pack $ unlines $ map f (findPos $ BS.unpack template)
     where f (str,pos) = str ++ "!" ++ show pos
           
 findPos :: String -> [(String,Int)]
-findPos = undefined
+findPos template 
+ | b == []   = [(a,-1)]
+ | n == []   = (a ++ "%",-1) : findPos (drop 1 b)
+ | otherwise = (a,read n::Int) : findPos bb
+    where a = takeWhile (/= '%') template
+          b = dropWhile (/= '%') template
+          n = takeWhile (\x -> x >= '0' && x <= '9') (drop 1 b)
+          bb = dropWhile (\x -> x >= '0' && x <= '9') (drop 1 b)
 
 lopt :: BS.ByteString -> String -> String -> IO()
 lopt = undefined
