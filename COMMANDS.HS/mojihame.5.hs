@@ -30,9 +30,13 @@ noopt tmpf dataf = do t <- readF tmpf
                       BS.putStr $ noopt' t (BS.words d)
 
 noopt' :: BS.ByteString -> [BS.ByteString] -> BS.ByteString
-noopt' template ws = BS.pack $ unlines $ map f (findPos $ BS.unpack template)
-    where f (str,pos) = str ++ "!" ++ show pos
-          
+noopt' template ws = BS.pack . concat $ map (markToStr ws) (findPos $ BS.unpack template)
+
+markToStr :: [BS.ByteString] -> (String,Int) -> String
+markToStr ws (str,pos) 
+ | pos == -1        = str
+ | pos > length ws  = str
+ | otherwise        = str ++ BS.unpack (ws !! (pos-1))
 
 findPos :: String -> [(String,Int)]
 findPos [] = []
@@ -56,4 +60,3 @@ escaped _                  = False
 
 lopt :: BS.ByteString -> String -> String -> IO()
 lopt = undefined
-
